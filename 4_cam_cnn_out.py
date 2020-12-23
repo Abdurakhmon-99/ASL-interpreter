@@ -46,7 +46,31 @@ import numpy as np
 from collections import Counter
 
 import time
+import os
+from twilio.rest import Client
 
+
+# Your Account Sid and Auth Token from twilio.com/console
+# and set the environment variables. See http://twil.io/secure
+account_sid = "ACd6e67e004f64b641377a470141bff720"
+auth_token ="9bd41f9f9e744a052e836e28800a2001"
+client = Client(account_sid, auth_token)
+
+last_letter = ""
+
+print("Enter your name: ")
+
+name = input()
+
+def send_message(message):
+    message = client.chat.services('IS470d35d9675049c5b9d9e78b7dc778ea') \
+                 .channels('CH8f8cab0dc3394cd58b952d604b6537fb') \
+                 .messages \
+                 .create(from_=name, body=message)
+
+
+ 
+    
 
 
            #0    1    2    3        4        5    6    7    8    9    10   11   12   13   14     15       16   17   18   19   20        21        22   23   24   25   26   27  28
@@ -55,7 +79,7 @@ out_label=['A', 'B', 'C', 'D', 'backspace', 'E', 'F', 'G', 'H', 'I', 'J', 'K', '
 
 pre=[]
 s=''
-camera = cv2.VideoCapture(1)
+camera = cv2.VideoCapture(0)
 top, right, bottom, left = 210, 0, 460, 250
 num_frames = 0
 last_added=''
@@ -64,6 +88,7 @@ count=0
 text=[]
 text1=[]
 spell = SpellChecker()
+last_word = ""
 
 while(True):
     (grabbed, frame) = camera.read()
@@ -99,16 +124,15 @@ while(True):
             count=0
         prev_label=str(out_label[pnb])
         if(count>=40):
-            if(cur_label=='nothing' and last_added=='nothing'):
-                spells = ''.join(map(str, text)).split('_')
-                print(spells)
-                for x in spells:
-                    word = spell.correction(x)
-                    text1.append(word)
-                word1=' '.join(map(str, text1)) 
+            if (cur_label == 'nothing' and last_added == 'nothing'):
+                word1 = ''.join(map(str, text))
                 print(word1)
-                text=[]
-                count=0
+                text = []
+                text1 = []
+                spells = []
+                count = 0
+                if word1:
+                    send_message(word1)
             else:
                 if(cur_label=='nothing'):
                     text=text
