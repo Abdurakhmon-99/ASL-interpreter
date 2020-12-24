@@ -14,7 +14,6 @@ from random import shuffle
 import imutils
 
 from collections import Counter
-from spellchecker import SpellChecker
 
 
 import time
@@ -53,7 +52,7 @@ from twilio.rest import Client
 # Your Account Sid and Auth Token from twilio.com/console
 # and set the environment variables. See http://twil.io/secure
 account_sid = "ACd6e67e004f64b641377a470141bff720"
-auth_token ="9bd41f9f9e744a052e836e28800a2001"
+auth_token ="b5e92fbefd0850648aa942d730c44df9"
 client = Client(account_sid, auth_token)
 
 last_letter = ""
@@ -69,9 +68,6 @@ def send_message(message):
                  .create(from_=name, body=message)
 
 
- 
-    
-
 
            #0    1    2    3        4        5    6    7    8    9    10   11   12   13   14     15       16   17   18   19   20        21        22   23   24   25   26   27  28
 out_label=['A', 'B', 'C', 'D', 'backspace', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'nothing', 'O', 'P', 'Q', 'R', 'S', 'blank space', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', ]
@@ -86,8 +82,6 @@ last_added=''
 prev_label=''
 count=0
 text=[]
-text1=[]
-spell = SpellChecker()
 last_word = ""
 
 while(True):
@@ -102,35 +96,31 @@ while(True):
     roi = frame[top:bottom, right:left]
     
     gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
-    img=gray
-    cv2.imshow('Current Roi', img)
-    img = cv2.resize(img, (IMG_SIZE,IMG_SIZE))
-    test_data =img
-    orig = img
+    cv2.imshow('Current Roi', gray)
+    img = cv2.resize(gray, (IMG_SIZE,IMG_SIZE))
     data = img.reshape(1,IMG_SIZE,IMG_SIZE,1)
     
     model_out = model.predict([data])[0]
     if max(model_out)*100 > 80:
         pnb=np.argmax(model_out)
         print(str(np.argmax(model_out))+" "+str(out_label[pnb]))
-        pre.append(out_label[pnb])
         cv2.putText(clone,
            '%s ' % (str(out_label[pnb])),
-           (0, 200), cv2.FONT_HERSHEY_PLAIN,3,(0, 255, 0))
+           (0, 200), cv2.FONT_HERSHEY_PLAIN,3,(255, 255, 255))
         cur_label=str(out_label[pnb])
         if(cur_label==prev_label):
             count += 1
         else:
             count=0
         prev_label=str(out_label[pnb])
-        if(count>=40):
+        if(count>=30):
             if (cur_label == 'nothing' and last_added == 'nothing'):
                 word1 = ''.join(map(str, text))
                 print(word1)
                 text = []
                 text1 = []
-                spells = []
                 count = 0
+                word1.replace("_", " ")
                 if word1:
                     send_message(word1)
             else:
@@ -144,9 +134,9 @@ while(True):
                     text.append(cur_label)
                 last_added=cur_label
                 count=0
-    cv2.rectangle(clone, (right, top), (left, bottom), (0,255,0), 2)
+    cv2.rectangle(clone, (right, top), (left, bottom), (255,255,255), 2)
     listToStr = ''.join(map(str, text)) 
-    cv2.putText(clone,'%s ' % (listToStr),(0, 150), cv2.FONT_HERSHEY_PLAIN,5,(0, 255, 0))
+    cv2.putText(clone,'%s ' % (listToStr),(0, 150), cv2.FONT_HERSHEY_PLAIN,5,(255, 255, 255))
 
     cv2.putText(clone, '%s ' % (str(s)),(10, 60), cv2.FONT_HERSHEY_PLAIN,3,(0, 0, 0))
 
